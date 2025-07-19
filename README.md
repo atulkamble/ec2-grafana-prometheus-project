@@ -1,4 +1,7 @@
 # ec2 | t3.medium | 20GB SSD | key.pem
+
+# SG 22, 3000, 9090
+
 ```
 sudo yum update -y
 sudo yum install git -y
