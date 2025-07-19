@@ -39,7 +39,7 @@ dnf update -y
 # 1. Grafana Installation
 ############################################
 echo "📦 Installing Grafana Enterprise..."
-dnf install -y $GRAFANA_RPM
+dnf install -y $GRAFANA_RPM || echo "⚠️ Grafana may already be installed"
 systemctl enable --now grafana-server
 grafana_version=$(grafana-server -v | head -n 1)
 echo "✅ Grafana installed successfully. Version: $grafana_version"
@@ -112,7 +112,15 @@ fi
 cd /tmp
 wget -q https://github.com/prometheus/node_exporter/releases/download/v$NODE_EXPORTER_VERSION/node_exporter-$NODE_EXPORTER_VERSION.linux-amd64.tar.gz
 tar -xzf node_exporter-$NODE_EXPORTER_VERSION.linux-amd64.tar.gz
-cp node_exporter-$NODE_EXPORTER_VERSION.linux-amd64/node_exporter /usr/local/bin/
+
+# Stop node_exporter if already running
+if systemctl is-active --quiet node_exporter; then
+    echo "⏹️ Stopping node_exporter before update..."
+    systemctl stop node_exporter
+fi
+
+# Replace binary
+cp -f node_exporter-$NODE_EXPORTER_VERSION.linux-amd64/node_exporter /usr/local/bin/
 chown node_exporter:node_exporter /usr/local/bin/node_exporter
 
 # Create Node Exporter systemd service
@@ -141,6 +149,8 @@ echo "✅ Node Exporter installed and running."
 echo -e "\n🎉 Monitoring stack setup complete!"
 echo "➡️ Prometheus: http://<your-ec2-ip>:9090"
 echo "➡️ Grafana:    http://<your-ec2-ip>:3000 (login: admin / admin)"
+echo "➡️ Node Exporter: http://<your-ec2-ip>:9100"
+
 
 ```
 
