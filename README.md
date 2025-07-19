@@ -1,4 +1,9 @@
 # ec2 | t3.medium | 20GB SSD | key.pem
+```
+cd Downloads
+chmod 400 key.pem
+ssh -i "key.pem" ec2-user@ec2-18-208-192-186.compute-1.amazonaws.com
+```
 
 # SG 22, 3000, 9090, 9100
 
