@@ -1,6 +1,6 @@
 # ec2 | t3.medium | 20GB SSD | key.pem
 
-# SG 22, 3000, 9090
+# SG 22, 3000, 9090, 9100
 
 ```
 sudo yum update -y
