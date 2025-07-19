@@ -9,7 +9,6 @@ git clone https://github.com/atulkamble/ec2-grafana-prometheus-project.git
 cd ec2-grafana-prometheus-project
 sudo -i passwd
 sudo su 
-touch script.sh 
 sudo chmod +x script.sh 
 ./script.sh
 ```
