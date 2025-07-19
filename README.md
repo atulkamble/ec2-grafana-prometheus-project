@@ -1,5 +1,6 @@
 # ec2 | t3.medium | 20GB SSD | key.pem
 
+# script.sh
 ```
 #!/bin/bash
 
@@ -128,3 +129,8 @@ echo "➡️ Prometheus: http://<your-ec2-ip>:9090"
 echo "➡️ Grafana:    http://<your-ec2-ip>:3000 (login: admin / admin)"
 
 ```
+sudo -i passwd
+sudo su 
+touch script.sh 
+sudo chmod +x script.sh 
+./script.sh 
