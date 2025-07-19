@@ -149,7 +149,235 @@ echo -e "\n🎉 Monitoring stack setup complete!"
 echo "➡️ Prometheus: http://<your-ec2-ip>:9090"
 echo "➡️ Grafana:    http://<your-ec2-ip>:3000 (login: admin / admin)"
 echo "➡️ Node Exporter: http://<your-ec2-ip>:9100"
-
-
 ```
+Here’s a complete beginner-to-advanced **Prometheus + Grafana** tutorial tailored for EC2 or local Linux environments, ideal for monitoring cloud-native infrastructure or services.
+
+---
+
+# 🚀 Prometheus + Grafana Monitoring Stack Tutorial
+
+## 📌 Overview
+
+This tutorial helps you:
+
+* Install Prometheus & Grafana
+* Monitor EC2 or Linux servers
+* Add custom exporters (Node Exporter)
+* Build dashboards in Grafana
+* Set alerts
+
+---
+
+## 🧰 Prerequisites
+
+* 1 or more EC2 instances or local VMs
+* Amazon Linux 2 / Ubuntu / RHEL (examples given for Amazon Linux 2)
+* Basic Linux knowledge
+* Internet access from the instance
+
+---
+
+## 🏗️ Step-by-Step Installation
+
+### 🔧 1. Install Prometheus
+
+```bash
+# Create user & directories
+sudo useradd --no-create-home --shell /bin/false prometheus
+sudo mkdir /etc/prometheus /var/lib/prometheus
+
+# Download Prometheus
+cd /tmp
+curl -s https://api.github.com/repos/prometheus/prometheus/releases/latest \
+| grep browser_download_url | grep linux-amd64 \
+| cut -d '"' -f 4 | wget -qi -
+
+# Extract and install
+tar xvf prometheus*.tar.gz
+cd prometheus-*/
+sudo cp prometheus promtool /usr/local/bin/
+sudo cp -r consoles console_libraries /etc/prometheus
+
+# Configuration
+sudo tee /etc/prometheus/prometheus.yml > /dev/null <<EOF
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+EOF
+
+# Systemd service
+sudo tee /etc/systemd/system/prometheus.service > /dev/null <<EOF
+[Unit]
+Description=Prometheus Monitoring
+After=network.target
+
+[Service]
+User=prometheus
+ExecStart=/usr/local/bin/prometheus \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --storage.tsdb.path=/var/lib/prometheus \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reexec
+sudo systemctl enable --now prometheus
+```
+
+Access: `http://<EC2-IP>:9090`
+
+---
+
+### 🖥️ 2. Install Node Exporter (Linux Metrics)
+
+```bash
+# Download
+cd /tmp
+curl -s https://api.github.com/repos/prometheus/node_exporter/releases/latest \
+| grep browser_download_url | grep linux-amd64 \
+| cut -d '"' -f 4 | wget -qi -
+
+# Extract and install
+tar xvf node_exporter*.tar.gz
+cd node_exporter-*/
+sudo cp node_exporter /usr/local/bin/
+
+# Systemd service
+sudo tee /etc/systemd/system/node_exporter.service > /dev/null <<EOF
+[Unit]
+Description=Node Exporter
+
+[Service]
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=default.target
+EOF
+
+sudo systemctl daemon-reexec
+sudo systemctl enable --now node_exporter
+```
+
+Add to Prometheus config:
+
+```yaml
+  - job_name: 'node'
+    static_configs:
+      - targets: ['localhost:9100']
+```
+
+Reload Prometheus:
+
+```bash
+sudo systemctl restart prometheus
+```
+
+---
+
+### 📊 3. Install Grafana
+
+```bash
+sudo yum install -y https://dl.grafana.com/oss/release/grafana-10.2.3-1.x86_64.rpm
+sudo systemctl enable --now grafana-server
+```
+
+Access: `http://<EC2-IP>:3000`
+Login: `admin / admin` → set new password.
+
+---
+
+## 📈 4. Configure Grafana with Prometheus
+
+### ➕ Add Data Source
+
+* Go to **Settings > Data Sources > Add data source**
+* Choose **Prometheus**
+* URL: `http://localhost:9090`
+* Save & Test
+
+---
+
+### 📁 5. Import Dashboards
+
+You can import dashboards from:
+
+* [https://grafana.com/grafana/dashboards/](https://grafana.com/grafana/dashboards/)
+
+Example Node Exporter Dashboard:
+🔗 [Node Exporter Full – ID 1860](https://grafana.com/grafana/dashboards/1860)
+
+Steps:
+
+1. Click "+" > Import
+2. Enter dashboard ID: `1860`
+3. Choose Prometheus as the data source
+
+---
+
+## 🚨 6. Alerts (optional)
+
+Basic alerting example:
+
+```yaml
+groups:
+- name: example
+  rules:
+  - alert: InstanceDown
+    expr: up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+```
+
+Reload alert rules in Prometheus:
+
+```bash
+# Add in prometheus.yml
+rule_files:
+  - "alert.rules.yml"
+```
+
+---
+
+## 🧪 7. Testing
+
+* Stop node\_exporter: `sudo systemctl stop node_exporter`
+* Check alerts in Prometheus
+* View in Grafana panel
+
+---
+
+## ✅ Summary
+
+| Tool          | Port | Role                         |
+| ------------- | ---- | ---------------------------- |
+| Prometheus    | 9090 | Metrics scraper & storage    |
+| Node Exporter | 9100 | Exposes system metrics       |
+| Grafana       | 3000 | Visualization and dashboards |
+
+---
+
+## 📦 Optional: Use Docker or EC2 AMI
+
+* Docker Compose version of the stack
+* Pre-built AMI with stack pre-installed
+* Use Terraform to provision stack + exporter + dashboards
+
+---
+
+## 📚 Bonus Resources
+
+* [Prometheus Docs](https://prometheus.io/docs/)
+* [Grafana Docs](https://grafana.com/docs/)
+* [Awesome Prometheus Alerts](https://awesome-prometheus-alerts.grep.to/)
+* [Monitoring EC2 with Node Exporter](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mon-scripts.html)
+
 
