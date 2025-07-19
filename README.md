@@ -1,4 +1,15 @@
 # ec2 | t3.medium | 20GB SSD | key.pem
+```
+sudo yum update -y
+sudo yum install git -y
+git clone https://github.com/atulkamble/ec2-grafana-prometheus-project.git
+cd ec2-grafana-prometheus-project
+sudo -i passwd
+sudo su 
+touch script.sh 
+sudo chmod +x script.sh 
+./script.sh
+```
 
 # script.sh
 ```
@@ -129,8 +140,4 @@ echo "➡️ Prometheus: http://<your-ec2-ip>:9090"
 echo "➡️ Grafana:    http://<your-ec2-ip>:3000 (login: admin / admin)"
 
 ```
-sudo -i passwd
-sudo su 
-touch script.sh 
-sudo chmod +x script.sh 
-./script.sh 
+
