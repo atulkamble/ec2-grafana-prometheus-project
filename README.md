@@ -1,3 +1,31 @@
+amazon linux | t3.medium | garafana.key 
+ssh 
+
+SG: 22, 3000, 9090, 9100
+
+// full installation 
+
+sudo yum install git -y 
+git clone https://github.com/atulkamble/ec2-grafana-prometheus-project.git
+cd ec2-grafana-prometheus-project
+chmod +x script.sh 
+sudo su
+./script.sh 
+
+http://instance-public-ip:3000 | admin >> admin
+http://instance-public-ip:9090
+http://instance-public-ip:9100
+
+login to garafana 
+
+add data sources >> select prometheus 
+
+http://localhost:9090 >> save & test 
+
+
+
+
+
 # ec2 | t3.medium | 20GB SSD | key.pem
 ```
 cd Downloads
