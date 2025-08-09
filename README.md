@@ -1,3 +1,9 @@
+## 📸 Screenshot
+
+![Grafana-Prometheus](https://github.com/atulkamble/ec2-grafana-prometheus-project/blob/main/Grafana-Prometheus.png)
+
+---
+
 amazon linux | t3.medium | garafana.key 
 ssh 
 
